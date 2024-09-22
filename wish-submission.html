@@ -58,9 +58,9 @@
         <h2>Wish for Something</h2>
         <p id="authMessage">You need to be registered and logged in to submit a wish.</p>
         <form id="wishForm" style="display: none;">
-            <input type="text" placeholder="Wish Title" required />
-            <textarea placeholder="Describe your wish..." required></textarea>
-            <input type="text" placeholder="Approximate Cost" required />
+            <input type="text" id="wishTitle" placeholder="Wish Title" required />
+            <textarea id="wishDescription" placeholder="Describe your wish..." required></textarea>
+            <input type="text" id="wishCost" placeholder="Approximate Cost" required />
             <button type="submit">Submit Wish</button>
         </form>
     </section>
@@ -69,7 +69,10 @@
     </footer>
 
     <script type="module">
-        // Your Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
             authDomain: "wishconnect-95318.firebaseapp.com",
@@ -80,26 +83,43 @@
             measurementId: "G-MJRGY2YR73"
         };
 
-        // Initialize Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        const db = getFirestore();
+        const auth = getAuth();
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is signed in
                 document.getElementById('authMessage').textContent = 'Submit your wish below:';
                 document.getElementById('wishForm').style.display = 'block';
             } else {
-                // User is signed out
                 document.getElementById('authMessage').textContent = 'You need to be registered and logged in to submit a wish.';
                 document.getElementById('wishForm').style.display = 'none';
             }
         });
+
+        document.getElementById('wishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('wishTitle').value;
+            const description = document.getElementById('wishDescription').value;
+            const cost = document.getElementById('wishCost').value;
+            const userId = auth.currentUser.uid; // Get the current user's ID
+
+            try {
+                await addDoc(collection(db, "wishes"), {
+                    title,
+                    description,
+                    cost,
+                    userId,
+                    createdAt: new Date()
+                });
+                alert("Wish submitted successfully!");
+                document.getElementById('wishForm').reset();
+            } catch (error) {
+                console.error("Error adding wish:", error);
+                alert("Error submitting wish: " + error.message);
+            }
+        });
     </script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
-    <script src="auth.js" type="module"></script>
 </body>
 </html>
