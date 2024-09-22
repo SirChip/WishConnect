@@ -1,6 +1,5 @@
-// Firebase imports
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -13,55 +12,58 @@ const firebaseConfig = {
     measurementId: "G-MJRGY2YR73"
 };
 
-// Initialize Firebase and Auth
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle sign up
-function signUp(email, password) {
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed up
-      const user = userCredential.user;
-      console.log("User signed up:", user);
-      alert("Sign up successful!");
-      // You can redirect the user or update UI here
-    })
-    .catch((error) => {
-      const errorMessage = error.message;
-      console.error("Sign up error:", errorMessage);
-      alert("Sign up error: " + errorMessage);
-    });
-}
+// Sign Up
+document.getElementById('signupButton').addEventListener('click', () => {
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Signed up
+            const user = userCredential.user;
+            alert("Account created successfully!");
+            window.location.href = 'dashboard.html'; // Redirect to dashboard after successful sign up
+        })
+        .catch((error) => {
+            alert("Error: " + error.message);
+        });
+});
 
-// Function to handle login
-function login(email, password) {
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Logged in
-      const user = userCredential.user;
-      console.log("User logged in:", user);
-      alert("Login successful!");
-      // You can redirect the user or update UI here
-    })
-    .catch((error) => {
-      const errorMessage = error.message;
-      console.error("Login error:", errorMessage);
-      alert("Login error: " + errorMessage);
-    });
-}
+// Login
+document.getElementById('loginButton').addEventListener('click', () => {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
-// Function to handle logout
-function logout() {
-  signOut(auth).then(() => {
-    // Sign-out successful
-    console.log("User signed out");
-    alert("Logged out successfully!");
-  }).catch((error) => {
-    console.error("Logout error:", error);
-    alert("Logout error: " + error.message);
-  });
-}
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Logged in
+            const user = userCredential.user;
+            alert("Login successful!");
+            window.location.href = 'dashboard.html'; // Redirect to dashboard after successful login
+        })
+        .catch((error) => {
+            alert("Login error: " + error.message);
+        });
+});
 
-// Export the functions
-export { signUp, login, logout };
+// Forgot Password
+document.getElementById('forgotPasswordLink').addEventListener('click', () => {
+    const email = document.getElementById('loginEmail').value;
+    
+    if (!email) {
+        alert('Please enter your email address to reset your password.');
+        return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            alert('Password reset email sent. Please check your inbox.');
+        })
+        .catch((error) => {
+            alert('Error: ' + error.message);
+        });
+});
