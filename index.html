@@ -74,7 +74,6 @@
     </style>
 </head>
 <body>
-
 <header>
     <h1>WishConnect</h1>
     <nav>
@@ -82,26 +81,23 @@
         <a href="#">How It Works</a>
         <a href="#">Success Stories</a>
         <a href="#">Community</a>
-        <a href="#">Sign Up/Login</a>
+        <a href="auth.html">Sign Up/Login</a>
     </nav>
 </header>
-
 <section class="hero">
     <h2>Make a Wish Come True</h2>
     <p>Join us in connecting those in need with those who can help.</p>
     <div class="cta">
         <button onclick="window.location.href='browse-wishes.html'">Browse Wishes</button>
-        <button onclick="window.location.href='wish-submission.html'">submit a Wish</button>
+        <button onclick="window.location.href='wish-submission.html'">Submit a Wish</button>
     </div>
 </section>
-
 <section class="how-it-works">
     <h2>How It Works</h2>
     <p>1. Wishers list what they want.</p>
     <p>2. Givers browse and fulfill wishes.</p>
     <p>3. Everyone makes a difference!</p>
 </section>
-
 <section class="featured-wishes">
     <h2>Featured Wishes</h2>
     <div class="card">
@@ -117,7 +113,6 @@
         <p>$100</p>
     </div>
 </section>
-
 <section class="success-stories">
     <h2>Success Stories</h2>
     <div class="card">
@@ -129,10 +124,29 @@
         <p>- John S.</p>
     </div>
 </section>
-
 <footer>
     <p>&copy; 2024 WishConnect. All rights reserved.</p>
 </footer>
 
+<script type="module">
+    // Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+        authDomain: "wishconnect-95318.firebaseapp.com",
+        projectId: "wishconnect-95318",
+        storageBucket: "wishconnect-95318.appspot.com",
+        messagingSenderId: "417927480202",
+        appId: "1:417927480202:web:28a57312f25e09919a7e73",
+        measurementId: "G-MJRGY2YR73"
+    };
+
+    // Initialize Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
+<script src="auth.js" type="module"></script>
 </body>
 </html>
