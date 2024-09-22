@@ -18,57 +18,44 @@
             padding: 20px;
             text-align: center;
         }
-        .dashboard {
-            max-width: 800px;
+        .user-dashboard {
+            max-width: 600px;
             margin: 20px auto;
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        h2 {
-            text-align: center;
+        .wish-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
         }
-        .wish-list, .actions {
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
+        footer {
+            background-color: #343a40;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .actions {
             text-align: center;
+            padding: 15px 0;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>WishConnect - User Dashboard</h1>
+        <h1>User Dashboard</h1>
     </header>
-    <section class="dashboard">
-        <h2>Welcome, <span id="username"></span>!</h2>
-        <div class="wish-list">
-            <h3>Your Wishes</h3>
-            <ul id="wishes">
-                <!-- User's submitted wishes will be displayed here -->
-            </ul>
-        </div>
-        <div class="actions">
-            <button onclick="window.location.href='wish-submission.html'">Submit a New Wish</button>
-            <button id="logoutButton">Log Out</button>
-        </div>
+    <section class="user-dashboard">
+        <h2>Your Submitted Wishes</h2>
+        <div id="wishList"></div>
     </section>
+    <footer>
+        <p>&copy; 2024 WishConnect. All rights reserved.</p>
+    </footer>
 
     <script type="module">
-        // Import Firebase functions
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
             authDomain: "wishconnect-95318.firebaseapp.com",
@@ -79,30 +66,34 @@
             measurementId: "G-MJRGY2YR73"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const db = getFirestore();
         const auth = getAuth();
 
-        // Check if the user is logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('username').textContent = user.email;
-                // Fetch and display the user's wishes (this would normally be fetched from your database)
-                document.getElementById('wishes').innerHTML = '<li>No wishes submitted yet.</li>';
-            } else {
-                // Redirect to login if not logged in
-                window.location.href = 'auth.html';
-            }
-        });
+        async function fetchUserWishes() {
+            const userId = auth.currentUser.uid; // Get the current user's ID
+            const wishesQuery = query(collection(db, "wishes"), where("userId", "==", userId));
+            const querySnapshot = await getDocs(wishesQuery);
+            const wishListDiv = document.getElementById('wishList');
+            wishListDiv.innerHTML = ''; // Clear previous wishes
 
-        // Handle logout
-        document.getElementById('logoutButton').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                alert('You have been logged out.');
-                window.location.href = 'auth.html';
-            }).catch((error) => {
-                alert('Logout error: ' + error.message);
+            querySnapshot.forEach((doc) => {
+                const wishData = doc.data();
+                const wishElement = document.createElement('div');
+                wishElement.className = 'wish-item';
+                wishElement.innerHTML = `<h3>${wishData.title}</h3>
+                                         <p>${wishData.description}</p>
+                                         <p>Approximate Cost: $${wishData.cost}</p>`;
+                wishListDiv.appendChild(wishElement);
             });
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchUserWishes(); // Fetch wishes when user is logged in
+            } else {
+                document.getElementById('wishList').innerHTML = '<p>Please log in to see your wishes.</p>';
+            }
         });
     </script>
 </body>
