@@ -6,7 +6,6 @@
     <title>WishConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Same styles as before */
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -46,20 +45,9 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .featured-wishes {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-        .card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: 10px;
-            padding: 20px;
-            width: 250px;
+        .how-it-works {
             text-align: center;
+            margin: 50px 0;
         }
         footer {
             background-color: #343a40;
@@ -89,15 +77,21 @@
         <button onclick="window.location.href='wish-submission.html'">Submit a Wish</button>
     </div>
 </section>
-<section class="featured-wishes">
-    <h2>Featured Wishes</h2>
-    <div id="wishCards" class="featured-wishes"></div>
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <p>1. Wishers list what they want.</p>
+    <p>2. Givers browse and fulfill wishes.</p>
+    <p>3. Everyone makes a difference!</p>
 </section>
 <footer>
     <p>&copy; 2024 WishConnect. All rights reserved.</p>
 </footer>
 
 <script type="module">
+    // Your Firebase configuration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+
     const firebaseConfig = {
         apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
         authDomain: "wishconnect-95318.firebaseapp.com",
@@ -108,25 +102,9 @@
         measurementId: "G-MJRGY2YR73"
     };
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    async function fetchWishes() {
-        const wishCardsContainer = document.getElementById('wishCards');
-        const wishesSnapshot = await getDocs(collection(db, 'wishes'));
-        wishesSnapshot.forEach(doc => {
-            const wishData = doc.data();
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `<h3>${wishData.title}</h3><p>$${wishData.amount}</p>`;
-            wishCardsContainer.appendChild(card);
-        });
-    }
-
-    fetchWishes();
+    const analytics = getAnalytics(app);
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
 <script src="auth.js" type="module"></script>
