@@ -49,6 +49,21 @@
             text-align: center;
             margin: 50px 0;
         }
+        .featured-wishes {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 20px;
+            width: 250px;
+            text-align: center;
+        }
         footer {
             background-color: #343a40;
             color: white;
@@ -83,15 +98,16 @@
     <p>2. Givers browse and fulfill wishes.</p>
     <p>3. Everyone makes a difference!</p>
 </section>
+<section class="featured-wishes">
+    <h2>Featured Wishes</h2>
+    <div id="wishesContainer" class="featured-wishes"></div>
+</section>
 <footer>
     <p>&copy; 2024 WishConnect. All rights reserved.</p>
 </footer>
 
 <script type="module">
-    // Your Firebase configuration
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
-
+    // Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
         authDomain: "wishconnect-95318.firebaseapp.com",
@@ -103,8 +119,29 @@
     };
 
     // Initialize Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    async function fetchWishes() {
+        const wishesSnapshot = await getDocs(collection(db, 'wishes'));
+        const wishesContainer = document.getElementById('wishesContainer');
+        wishesSnapshot.forEach((doc) => {
+            const wishData = doc.data();
+            const wishCard = document.createElement('div');
+            wishCard.className = 'card';
+            wishCard.innerHTML = `
+                <h3>${wishData.title}</h3>
+                <p>${wishData.cost}</p>
+                <button onclick="window.location.href='fulfill-wish.html?id=${doc.id}'">View & Fulfill</button>
+            `;
+            wishesContainer.appendChild(wishCard);
+        });
+    }
+
+    fetchWishes();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
 <script src="auth.js" type="module"></script>
