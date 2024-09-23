@@ -1,60 +1,56 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-// Firebase configuration
+// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-  authDomain: "wishconnect-95318.firebaseapp.com",
-  projectId: "wishconnect-95318",
-  storageBucket: "wishconnect-95318.appspot.com",
-  messagingSenderId: "417927480202",
-  appId: "1:417927480202:web:28a57312f25e09919a7e73"
+    apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+    authDomain: "wishconnect-95318.firebaseapp.com",
+    projectId: "wishconnect-95318",
+    storageBucket: "wishconnect-95318.appspot.com",
+    messagingSenderId: "417927480202",
+    appId: "1:417927480202:web:28a57312f25e09919a7e73",
+    measurementId: "G-MJRGY2YR73"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Form submission
-const authForm = document.getElementById('authForm');
-const authMessage = document.getElementById('authMessage');
-authForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+// Sign Up
+document.getElementById('signup-button').addEventListener('click', async () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const paypal = document.getElementById('paypal').value;
 
-    // Try to sign in
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            // If successful, redirect to the dashboard
-            window.location.href = 'dashboard.html';
-        })
-        .catch((error) => {
-            // If not signed in, try to create a new user
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // If successful, redirect to the dashboard
-                    window.location.href = 'dashboard.html';
-                })
-                .catch((error) => {
-                    // Display any error
-                    authMessage.textContent = error.message;
-                });
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Save user details to Firestore
+        await addDoc(collection(db, "users"), {
+            uid: user.uid,
+            email: email,
+            paypal: paypal
         });
+
+        document.getElementById('signup-message').textContent = "Sign up successful!";
+    } catch (error) {
+        document.getElementById('signup-message').textContent = error.message;
+    }
 });
 
-// Password reset
-document.getElementById('resetPassword').addEventListener('click', () => {
-    const email = document.getElementById('email').value;
-    if (email) {
-        sendPasswordResetEmail(auth, email)
-            .then(() => {
-                authMessage.textContent = 'Password reset email sent.';
-            })
-            .catch((error) => {
-                authMessage.textContent = error.message;
-            });
-    } else {
-        authMessage.textContent = 'Please enter an email first.';
+// Login
+document.getElementById('login-button').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        document.getElementById('login-message').textContent = "Login successful!";
+        // Redirect or load user dashboard
+    } catch (error) {
+        document.getElementById('login-message').textContent = error.message;
     }
 });
