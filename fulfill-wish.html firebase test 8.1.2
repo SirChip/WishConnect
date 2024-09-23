@@ -18,15 +18,39 @@
             padding: 20px;
             text-align: center;
         }
+        nav {
+            margin: 20px 0;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+        }
         .wish-details {
-            max-width: 600px;
-            margin: 20px auto;
             background-color: #fff;
             padding: 30px;
+            margin: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
-        button {
+        .wish-details h2 {
+            margin: 10px 0;
+        }
+        .wish-details p {
+            color: #555;
+        }
+        .fulfill-form {
+            margin: 20px 0;
+        }
+        .fulfill-form input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .fulfill-form button {
             padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
@@ -44,15 +68,32 @@
     </style>
 </head>
 <body>
+
 <header>
-    <h1>Fulfill Wish</h1>
+    <h1>WishConnect</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="#">How It Works</a>
+        <a href="#">Success Stories</a>
+        <a href="browse-wishes.html">Browse Wishes</a>
+        <a href="#">Sign Up/Login</a>
+    </nav>
 </header>
 
 <section class="wish-details" id="wishDetails">
-    <h2>Wish Details</h2>
-    <p id="wishTitle"></p>
+    <h2 id="wishTitle"></h2>
+    <p id="wishDescription"></p>
     <p id="wishCost"></p>
-    <button id="fulfillButton">Fulfill Wish</button>
+    <p id="wishWisher"></p>
+    <p id="wishStory"></p>
+
+    <div class="fulfill-form">
+        <h3>Fulfill This Wish</h3>
+        <input type="text" id="fulfillerName" placeholder="Your Name" required />
+        <input type="email" id="fulfillerEmail" placeholder="Your Email" required />
+        <input type="text" id="paymentAmount" placeholder="Payment Amount" readonly />
+        <button id="fulfillButton">Confirm & Fulfill Wish</button>
+    </div>
 </section>
 
 <footer>
@@ -86,8 +127,12 @@
         const wishSnap = await getDoc(wishRef);
         if (wishSnap.exists()) {
             const wishData = wishSnap.data();
-            document.getElementById('wishTitle').textContent = `Title: ${wishData.title}`;
-            document.getElementById('wishCost').textContent = `Cost: ${wishData.cost}`;
+            document.getElementById('wishTitle').textContent = wishData.title;
+            document.getElementById('wishDescription').textContent = `Description: ${wishData.description}`;
+            document.getElementById('wishCost').textContent = `Cost: $${wishData.cost}`;
+            document.getElementById('wishWisher').textContent = `Wisher: ${wishData.wisherName}`;
+            document.getElementById('wishStory').textContent = wishData.story;
+            document.getElementById('paymentAmount').value = `$${wishData.cost}`;
         } else {
             document.getElementById('wishDetails').innerHTML = "<p>Wish not found.</p>";
         }
