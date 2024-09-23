@@ -18,24 +18,22 @@
             padding: 20px;
             text-align: center;
         }
-        .user-dashboard {
-            max-width: 600px;
+        #userWishes {
+            max-width: 800px;
             margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .wish-item {
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
+        .wish {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         footer {
             background-color: #343a40;
             color: white;
             text-align: center;
             padding: 15px 0;
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -43,8 +41,8 @@
     <header>
         <h1>User Dashboard</h1>
     </header>
-    <section class="user-dashboard">
-        <h2>Your Submitted Wishes</h2>
+    <section id="userWishes">
+        <h2>Your Wishes</h2>
         <div id="wishList"></div>
     </section>
     <footer>
@@ -57,42 +55,37 @@
         import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-            authDomain: "wishconnect-95318.firebaseapp.com",
-            projectId: "wishconnect-95318",
-            storageBucket: "wishconnect-95318.appspot.com",
-            messagingSenderId: "417927480202",
-            appId: "1:417927480202:web:28a57312f25e09919a7e73",
-            measurementId: "G-MJRGY2YR73"
+          apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+          authDomain: "wishconnect-95318.firebaseapp.com",
+          projectId: "wishconnect-95318",
+          storageBucket: "wishconnect-95318.appspot.com",
+          messagingSenderId: "417927480202",
+          appId: "1:417927480202:web:28a57312f25e09919a7e73"
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore();
         const auth = getAuth();
+        const db = getFirestore(app);
 
-        async function fetchUserWishes() {
-            const userId = auth.currentUser.uid; // Get the current user's ID
-            const wishesQuery = query(collection(db, "wishes"), where("userId", "==", userId));
-            const querySnapshot = await getDocs(wishesQuery);
-            const wishListDiv = document.getElementById('wishList');
-            wishListDiv.innerHTML = ''; // Clear previous wishes
-
-            querySnapshot.forEach((doc) => {
-                const wishData = doc.data();
-                const wishElement = document.createElement('div');
-                wishElement.className = 'wish-item';
-                wishElement.innerHTML = `<h3>${wishData.title}</h3>
-                                         <p>${wishData.description}</p>
-                                         <p>Approximate Cost: $${wishData.cost}</p>`;
-                wishListDiv.appendChild(wishElement);
-            });
-        }
-
-        auth.onAuthStateChanged((user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                fetchUserWishes(); // Fetch wishes when user is logged in
+                const q = query(collection(db, "wishes"), where("userId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
+                const wishList = document.getElementById("wishList");
+
+                querySnapshot.forEach((doc) => {
+                    const wishData = doc.data();
+                    const wishItem = document.createElement("div");
+                    wishItem.className = "wish";
+                    wishItem.innerHTML = `
+                        <h3>${wishData.title}</h3>
+                        <p>${wishData.description}</p>
+                        <p>Cost: $${wishData.cost}</p>
+                    `;
+                    wishList.appendChild(wishItem);
+                });
             } else {
-                document.getElementById('wishList').innerHTML = '<p>Please log in to see your wishes.</p>';
+                window.location.href = "auth.html";
             }
         });
     </script>
