@@ -18,73 +18,116 @@
             padding: 20px;
             text-align: center;
         }
-        #allWishes {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+        nav {
+            margin: 20px 0;
         }
-        .wish {
-            background-color: white;
-            padding: 20px;
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+        .search-filter {
+            text-align: center;
+            margin: 20px;
+        }
+        input[type="search"] {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .wishes {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px;
+        }
+        .wish-card {
+            background-color: #fff;
             border-radius: 8px;
-            margin-bottom: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 20px;
+            width: 250px;
+            text-align: center;
         }
         footer {
             background-color: #343a40;
             color: white;
             text-align: center;
             padding: 15px 0;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Browse Wishes</h1>
-        <p>Explore and help fulfill the wishes of others.</p>
-    </header>
-    <section id="allWishes">
-        <h2>All Wishes</h2>
-        <div id="wishList"></div>
-    </section>
-    <footer>
-        <p>&copy; 2024 WishConnect. All rights reserved.</p>
-    </footer>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+<header>
+    <h1>WishConnect</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="#">How It Works</a>
+        <a href="#">Success Stories</a>
+        <a href="browse-wishes.html">Browse Wishes</a>
+        <a href="#">Sign Up/Login</a>
+    </nav>
+</header>
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-          authDomain: "wishconnect-95318.firebaseapp.com",
-          projectId: "wishconnect-95318",
-          storageBucket: "wishconnect-95318.appspot.com",
-          messagingSenderId: "417927480202",
-          appId: "1:417927480202:web:28a57312f25e09919a7e73"
-        };
+<section class="search-filter">
+    <input type="search" placeholder="Search wishes..." />
+    <select>
+        <option value="all">All Categories</option>
+        <option value="education">Education</option>
+        <option value="clothing">Clothing</option>
+        <option value="food">Food</option>
+        <option value="healthcare">Healthcare</option>
+    </select>
+</section>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<section class="wishes" id="wishCards"></section>
 
-        async function fetchWishes() {
-            const querySnapshot = await getDocs(collection(db, "wishes"));
-            const wishList = document.getElementById("wishList");
+<footer>
+    <p>&copy; 2024 WishConnect. All rights reserved.</p>
+</footer>
 
-            querySnapshot.forEach((doc) => {
-                const wishData = doc.data();
-                const wishItem = document.createElement("div");
-                wishItem.className = "wish";
-                wishItem.innerHTML = `
-                    <h3>${wishData.title}</h3>
-                    <p>${wishData.description}</p>
-                    <p>Cost: $${wishData.cost}</p>
-                `;
-                wishList.appendChild(wishItem);
-            });
-        }
+<script type="module">
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "wishconnect-95318.firebaseapp.com",
+        projectId: "wishconnect-95318",
+        storageBucket: "wishconnect-95318.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID",
+        measurementId: "YOUR_MEASUREMENT_ID"
+    };
 
-        fetchWishes();
-    </script>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function fetchWishes() {
+        const wishCardsContainer = document.getElementById('wishCards');
+        const wishesSnapshot = await getDocs(collection(db, 'wishes'));
+        wishesSnapshot.forEach(doc => {
+            const wishData = doc.data();
+            const card = document.createElement('div');
+            card.className = 'wish-card';
+            card.innerHTML = `<h3>${wishData.title}</h3><p>$${wishData.amount}</p><button onclick="window.location.href='fulfill-wishes.html'">View & Fulfill</button>`;
+            wishCardsContainer.appendChild(card);
+        });
+    }
+
+    fetchWishes();
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
+<script src="auth.js" type="module"></script>
 </body>
 </html>
