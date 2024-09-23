@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Sign Up - WishConnect</title>
+    <title>WishConnect - Login/Signup</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -12,17 +12,11 @@
             padding: 0;
             background-color: #f8f9fa;
         }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
         .auth-container {
             max-width: 400px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
+            margin: 100px auto;
+            background-color: white;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -40,17 +34,6 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-        }
-        p {
-            text-align: center;
-        }
-        .forgot-password {
-            margin-top: 10px;
-            display: block;
-            color: #4CAF50;
-            text-decoration: none;
-            cursor: pointer;
         }
         footer {
             background-color: #343a40;
@@ -62,27 +45,21 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>WishConnect - Login / Sign Up</h1>
-    </header>
-
-    <section class="auth-container">
-        <h2>Login</h2>
-        <input type="email" id="loginEmail" placeholder="Email" required>
-        <input type="password" id="loginPassword" placeholder="Password" required>
-        <button id="loginButton">Login</button>
-        <p><a id="forgotPasswordLink" class="forgot-password">Forgot your password?</a></p>
-
-        <h2>Sign Up</h2>
-        <input type="email" id="signupEmail" placeholder="Email" required>
-        <input type="password" id="signupPassword" placeholder="Password" required>
-        <button id="signupButton">Sign Up</button>
-    </section>
-
+    <div class="auth-container">
+        <h2>Login or Sign Up</h2>
+        <form id="authForm">
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Password" required />
+            <button type="submit">Submit</button>
+        </form>
+        <p id="authMessage"></p>
+        <button id="resetPassword">Forgot Password?</button>
+    </div>
+    
     <footer>
         <p>&copy; 2024 WishConnect. All rights reserved.</p>
     </footer>
 
-    <script src="auth.js" type="module"></script>
+    <script type="module" src="auth.js"></script>
 </body>
 </html>
