@@ -1,10 +1,11 @@
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-const db = getFirestore();
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
-const auth = firebase.auth();
+const db = getFirestore();
+const auth = getAuth();
 
 // After successful login
-auth.onAuthStateChanged(async (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists() || !userDoc.data().paypalUsername) {
@@ -31,7 +32,6 @@ document.getElementById('signup-form').onsubmit = async (e) => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     const paypalUsername = e.target.paypalUsername.value; // Get PayPal username
-
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         await setDoc(doc(db, "users", userCredential.user.uid), {
@@ -49,7 +49,6 @@ document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-
     try {
         await auth.signInWithEmailAndPassword(email, password);
         window.location.href = 'dashboard.html';
