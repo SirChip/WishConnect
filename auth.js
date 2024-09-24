@@ -27,11 +27,11 @@ function logoutUser() {
 }
 
 // Add event listener to the signup form
-document.getElementById('signup-button').onsubmit = async (e) => {
+document.getElementById('signup-button').addEventListener('click', async (e) => {
     e.preventDefault();
-    const email = e.target.email.value;
-    const password = e.target.password.value;
-    const paypalUsername = e.target.paypalUsername.value; // Get PayPal username
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const paypalUsername = document.getElementById('paypal').value; // Get PayPal username
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         await setDoc(doc(db, "users", userCredential.user.uid), {
@@ -42,17 +42,17 @@ document.getElementById('signup-button').onsubmit = async (e) => {
     } catch (error) {
         console.error("Error signing up:", error);
     }
-};
+});
 
 // Add event listener to the login form
-document.getElementById('login-button').onsubmit = async (e) => {
+document.getElementById('login-button').addEventListener('click', async (e) => {
     e.preventDefault();
-    const email = e.target.email.value;
-    const password = e.target.password.value;
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
     try {
         await auth.signInWithEmailAndPassword(email, password);
         window.location.href = 'dashboard.html';
     } catch (error) {
         console.error("Error logging in:", error);
     }
-};
+});
