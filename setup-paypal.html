@@ -47,27 +47,26 @@
     </style>
 </head>
 <body>
-
 <header>
     <h1>Set Up Your PayPal Account</h1>
 </header>
-
 <section>
     <h2>Please enter your PayPal username:</h2>
     <input type="text" id="paypal-username" placeholder="Your PayPal Username" required />
     <button id="save-paypal">Save</button>
 </section>
-
 <footer>
     <p>&copy; 2024 WishConnect. All rights reserved.</p>
 </footer>
-
 <script type="module">
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const auth = getAuth();
     const db = getFirestore();
 
     document.getElementById('save-paypal').onclick = async () => {
-        const user = firebase.auth().currentUser;
+        const user = auth.currentUser;
         const paypalUsername = document.getElementById('paypal-username').value;
         if (user) {
             await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername }, { merge: true });
@@ -78,6 +77,5 @@
         }
     };
 </script>
-
 </body>
 </html>
