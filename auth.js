@@ -27,7 +27,7 @@ function logoutUser() {
 }
 
 // Add event listener to the signup form
-document.getElementById('signup-form').onsubmit = async (e) => {
+document.getElementById('signup-button').onsubmit = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
@@ -45,7 +45,7 @@ document.getElementById('signup-form').onsubmit = async (e) => {
 };
 
 // Add event listener to the login form
-document.getElementById('login-form').onsubmit = async (e) => {
+document.getElementById('login-button').onsubmit = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
