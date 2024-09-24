@@ -1,5 +1,21 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+  authDomain: "wishconnect-95318.firebaseapp.com",
+  projectId: "wishconnect-95318",
+  storageBucket: "wishconnect-95318.appspot.com",
+  messagingSenderId: "417927480202",
+  appId: "1:417927480202:web:28a57312f25e09919a7e73",
+  measurementId: "G-MJRGY2YR73"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
 const db = getFirestore();
 const auth = getAuth();
