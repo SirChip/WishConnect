@@ -7,7 +7,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
     authDomain: "wishconnect-95318.firebaseapp.com",
     projectId: "wishconnect-95318",
-    storageBucket: "wishconnect-95318",
+    storageBucket: "wishconnect-95318.appspot.com",
     messagingSenderId: "417927480202",
     appId: "1:417927480202:web:28a57312f25e09919a7e73"
 };
