@@ -88,7 +88,7 @@
         const auth = getAuth();
         const db = getFirestore(app);
 
-        // Fetch and display featured wishes
+        // Fetch and display featured wishes for everyone
         async function fetchFeaturedWishes() {
             const wishesCollection = collection(db, "wishes");
             const wishSnapshot = await getDocs(wishesCollection);
