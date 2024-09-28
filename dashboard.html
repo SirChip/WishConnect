@@ -88,7 +88,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, deleteDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
@@ -181,7 +181,7 @@
                 alert("Wish updated successfully!");
             } else {
                 // Otherwise, we're creating a new wish
-                await setDoc(doc(db, "wishes", doc(db.collection("wishes").doc().id)), {
+                await setDoc(doc(db, "wishes", doc(db.collection("wishes")).id), {
                     title: title,
                     description: description,
                     cost: cost,
