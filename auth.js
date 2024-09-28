@@ -45,8 +45,9 @@ authForm.addEventListener('submit', async (e) => {
             createUserWithEmailAndPassword(auth, email, password)
                 .then(async (userCredential) => {
                     const user = userCredential.user;
-                    // Redirect to PayPal setup after first sign-up
-                    window.location.href = 'setup-paypal.html';
+                    // Initialize the user document with PayPal username
+                    await setDoc(doc(db, "users", user.uid), { paypalUsername: null }); // Initialize PayPal username
+                    window.location.href = 'setup-paypal.html'; // Redirect to PayPal setup
                 })
                 .catch((error) => {
                     // Display any error
