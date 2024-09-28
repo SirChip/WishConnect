@@ -109,7 +109,8 @@
             const description = document.getElementById('wishDescription').value;
             const cost = document.getElementById('wishCost').value;
 
-            await setDoc(doc(db, "wishes", doc(db.collection("wishes").doc().id)), {
+            // Create a new document in the "wishes" collection
+            await setDoc(doc(db, "wishes", doc(db.collection("wishes")).id), {
                 title: title,
                 description: description,
                 cost: cost,
