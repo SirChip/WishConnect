@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fulfill Wish - WishConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -19,7 +20,10 @@
             text-align: center;
         }
         nav {
-            margin: 20px 0;
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            text-align: center;
         }
         nav a {
             color: white;
@@ -29,34 +33,13 @@
         .wish-details {
             background-color: #fff;
             padding: 30px;
-            margin: 20px;
+            margin: 20px auto;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            max-width: 600px;
         }
-        .wish-details h2 {
-            margin: 10px 0;
-        }
-        .wish-details p {
-            color: #555;
-        }
-        .fulfill-form {
-            margin: 20px 0;
-        }
-        .fulfill-form input {
-            padding: 10px;
-            margin: 10px 0;
-            width: 200px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .fulfill-form button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        #paypal-button-container {
+            margin-top: 20px;
         }
         footer {
             background-color: #343a40;
@@ -65,85 +48,138 @@
             padding: 15px 0;
             margin-top: 20px;
         }
+        #logoutButton {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <h1>WishConnect</h1>
+        <nav>
+            <span id="navLinks"></span>
+        </nav>
+    </header>
 
-<header>
-    <h1>WishConnect</h1>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="#">How It Works</a>
-        <a href="#">Success Stories</a>
-        <a href="browse-wishes.html">Browse Wishes</a>
-        <a href="#">Sign Up/Login</a>
-    </nav>
-</header>
-
-<section class="wish-details" id="wishDetails">
-    <h2 id="wishTitle"></h2>
-    <p id="wishDescription"></p>
-    <p id="wishCost"></p>
-    <p id="wishWisher"></p>
-    <p id="wishStory"></p>
-
-    <div class="fulfill-form">
-        <h3>Fulfill This Wish</h3>
-        <input type="text" id="fulfillerName" placeholder="Your Name" required />
-        <input type="email" id="fulfillerEmail" placeholder="Your Email" required />
-        <input type="text" id="paymentAmount" placeholder="Payment Amount" readonly />
-        <button id="fulfillButton">Confirm & Fulfill Wish</button>
+    <div class="wish-details" id="wishDetails">
+        <!-- Wish details will be dynamically inserted here -->
     </div>
-</section>
 
-<footer>
-    <p>&copy; 2024 WishConnect. All rights reserved.</p>
-</footer>
+    <div id="paypal-button-container"></div>
 
-<script type="module">
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-        authDomain: "wishconnect-95318.firebaseapp.com",
-        projectId: "wishconnect-95318",
-        storageBucket: "wishconnect-95318.appspot.com",
-        messagingSenderId: "417927480202",
-        appId: "1:417927480202:web:28a57312f25e09919a7e73",
-        measurementId: "G-MJRGY2YR73"
-    };
+    <footer>
+        <p>&copy; 2024 WishConnect. All rights reserved.</p>
+    </footer>
 
-    // Initialize Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+            authDomain: "wishconnect-95318.firebaseapp.com",
+            projectId: "wishconnect-95318",
+            storageBucket: "wishconnect-95318.appspot.com",
+            messagingSenderId: "417927480202",
+            appId: "1:417927480202:web:28a57312f25e09919a7e73"
+        };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const wishId = urlParams.get('id');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
 
-    async function fetchWish() {
-        const wishRef = doc(db, 'wishes', wishId);
-        const wishSnap = await getDoc(wishRef);
-        if (wishSnap.exists()) {
-            const wishData = wishSnap.data();
-            document.getElementById('wishTitle').textContent = wishData.title;
-            document.getElementById('wishDescription').textContent = `Description: ${wishData.description}`;
-            document.getElementById('wishCost').textContent = `Cost: $${wishData.cost}`;
-            document.getElementById('wishWisher').textContent = `Wisher: ${wishData.wisherName}`;
-            document.getElementById('wishStory').textContent = wishData.story;
-            document.getElementById('paymentAmount').value = `$${wishData.cost}`;
-        } else {
-            document.getElementById('wishDetails').innerHTML = "<p>Wish not found.</p>";
+        let wishData = null;
+
+        function updateNavigation(user) {
+            const navLinks = document.getElementById('navLinks');
+            if (user) {
+                navLinks.innerHTML = `
+                    <a href="index.html">Home</a>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Success Stories</a>
+                    <a href="browse-wishes.html">Browse Wishes</a>
+                    <button id="logoutButton">Logout</button>
+                `;
+                document.getElementById('logoutButton').addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.location.href = "index.html";
+                    });
+                });
+            } else {
+                navLinks.innerHTML = `
+                    <a href="index.html">Home</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Success Stories</a>
+                    <a href="browse-wishes.html">Browse Wishes</a>
+                    <a href="auth.html">Sign Up/Login</a>
+                `;
+            }
         }
-    }
 
-    document.getElementById('fulfillButton').addEventListener('click', () => {
-        alert('Thank you for fulfilling this wish!');
-        // Additional logic for fulfillment can be added here.
-    });
+        onAuthStateChanged(auth, (user) => {
+            updateNavigation(user);
+            if (user) {
+                fetchWishDetails();
+            } else {
+                document.getElementById('wishDetails').innerHTML = "<p>Please log in to view and fulfill wishes.</p>";
+            }
+        });
 
-    fetchWish();
-</script>
+        async function fetchWishDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const wishId = urlParams.get('wishId');
+
+            if (!wishId) {
+                document.getElementById('wishDetails').innerHTML = "<p>No wish specified.</p>";
+                return;
+            }
+
+            const wishRef = doc(db, 'wishes', wishId);
+            const wishSnap = await getDoc(wishRef);
+
+            if (wishSnap.exists()) {
+                wishData = wishSnap.data();
+                document.getElementById('wishDetails').innerHTML = `
+                    <h2>${wishData.title}</h2>
+                    <p>${wishData.description}</p>
+                    <p>Cost: $${wishData.cost}</p>
+                `;
+                initPayPalButton(wishData.cost, wishData.paypalUsername);
+            } else {
+                document.getElementById('wishDetails').innerHTML = "<p>Wish not found.</p>";
+            }
+        }
+
+        function initPayPalButton(cost, paypalUsername) {
+            const handlingFee = cost * 0.05; // 5% handling fee
+            const totalAmount = parseFloat(cost) + handlingFee;
+
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: totalAmount.toFixed(2)
+                            }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        // Handle successful payment here
+                        alert('Transaction completed by ' + details.payer.name.given_name);
+                        // You would typically update your database here to mark the wish as fulfilled
+                    });
+                }
+            }).render('#paypal-button-container');
+        }
+    </script>
 </body>
 </html>
