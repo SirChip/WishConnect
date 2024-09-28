@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Firebase configuration
@@ -7,7 +7,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
     authDomain: "wishconnect-95318.firebaseapp.com",
     projectId: "wishconnect-95318",
-    storageBucket: "wishconnect-95318.appspot.com",
+    storageBucket: "wishconnect-95318",
     messagingSenderId: "417927480202",
     appId: "1:417927480202:web:28a57312f25e09919a7e73"
 };
@@ -17,83 +17,51 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Form submission
-const authForm = document.getElementById('authForm');
+// Form submissions
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
 const authMessage = document.getElementById('authMessage');
 
-authForm.addEventListener('submit', async (e) => {
+// Handle Login
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const paypalUsername = document.getElementById('paypalUsername').value; // Get PayPal username
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
-    // Try to sign in
     signInWithEmailAndPassword(auth, email, password)
-        .then(async (userCredential) => {
-            const user = userCredential.user;
-
-            // Redirect to dashboard if logged in
+        .then((userCredential) => {
+            // Redirect to dashboard
             window.location.href = 'dashboard.html';
         })
         .catch((error) => {
-            // If not signed in, try to create a new user
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(async (userCredential) => {
-                    const user = userCredential.user;
-                    // Save user details including PayPal username
-                    await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername });
-                    window.location.href = 'dashboard.html'; // Redirect to dashboard
-                })
-                .catch((error) => {
-                    // Display any error
-                    authMessage.textContent = error.message;
-                });
+            authMessage.textContent = error.message;
         });
 });
 
-// Password reset
-document.getElementById('resetPassword').addEventListener('click', () => {
-    const email = document.getElementById('email').value;
-    if (email) {
-        sendPasswordResetEmail(auth, email)
-            .then(() => {
-                authMessage.textContent = 'Password reset email sent.';
-            })
-            .catch((error) => {
-                authMessage.textContent = error.message;
-            });
-    } else {
-        authMessage.textContent = 'Please enter an email first.';
-    }
+// Handle Sign-Up
+signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const paypalUsername = document.getElementById('paypalUsername').value; // Get PayPal username
+
+    createUserWithEmailAndPassword(auth, email, password)
+        .then(async (userCredential) => {
+            const user = userCredential.user;
+            // Save user details including PayPal username
+            await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername });
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        })
+        .catch((error) => {
+            authMessage.textContent = error.message;
+        });
 });
 
-// Navigation for logged in users
-const nav = document.querySelector('nav');
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        nav.innerHTML = `
-            <a href="index.html">Home</a>
-            <a href="#">How It Works</a>
-            <a href="#">Success Stories</a>
-            <a href="browse-wishes.html">Browse Wishes</a>
-            <button id="logoutButton">Logout</button>
-        `;
-
-        // Add logout functionality
-        document.getElementById('logoutButton').addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = "auth.html"; // Redirect to login page
-            }).catch((error) => {
-                console.error("Error logging out: ", error);
-            });
-        });
-    } else {
-        nav.innerHTML = `
-            <a href="index.html">Home</a>
-            <a href="#">How It Works</a>
-            <a href="#">Success Stories</a>
-            <a href="browse-wishes.html">Browse Wishes</a>
-            <a href="auth.html">Sign Up/Login</a>
-        `;
-    }
+// Switch between Login and Sign-Up forms
+document.getElementById('toggleForm').addEventListener('click', () => {
+    loginForm.classList.toggle('active');
+    signupForm.classList.toggle('active');
+    const formTitle = document.getElementById('formTitle');
+    formTitle.textContent = loginForm.classList.contains('active') ? "Login" : "Sign Up";
 });
