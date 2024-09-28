@@ -59,7 +59,7 @@
         onAuthStateChanged(auth, (user) => {
             const navLinks = document.getElementById('navLinks');
             if (user) {
-                // If user is logged in
+                // User is logged in
                 navLinks.innerHTML = `
                     <a href="dashboard.html">Dashboard</a>
                     <a href="#">How It Works</a>
@@ -75,7 +75,7 @@
                     });
                 });
             } else {
-                // If user is not logged in
+                // User is not logged in
                 navLinks.innerHTML = `
                     <a href="#">How It Works</a>
                     <a href="#">Success Stories</a>
