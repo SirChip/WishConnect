@@ -33,6 +33,14 @@
             text-align: center;
             margin: 20px;
         }
+        .submission-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
         .wishes-section {
             margin: 20px;
             text-align: left;
@@ -63,6 +71,17 @@
         <p>Browse our community, share your wishes, and see how we can help you achieve them.</p>
     </div>
 
+    <div class="submission-form">
+        <h2>Submit a Wish</h2>
+        <form id="wishForm" style="display: none;">
+            <input type="text" id="wishTitle" placeholder="Wish Title" required />
+            <textarea id="wishDescription" placeholder="Describe your wish..." required></textarea>
+            <input type="text" id="wishCost" placeholder="Approximate Cost" required />
+            <input type="hidden" id="wishId" />
+            <button type="submit">Submit Wish</button>
+        </form>
+    </div>
+
     <div class="wishes-section">
         <h2>Featured Wishes</h2>
         <div id="featuredWishes"></div>
@@ -74,7 +93,7 @@
             apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
             authDomain: "wishconnect-95318.firebaseapp.com",
             projectId: "wishconnect-95318",
-            storageBucket: "wishconnect-95318.appspot.com",
+            storageBucket: "wishconnect-95318",
             messagingSenderId: "417927480202",
             appId: "1:417927480202:web:28a57312f25e09919a7e73"
         };
@@ -82,7 +101,7 @@
         // Initialize Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
@@ -119,6 +138,8 @@
                     <a href="browse-wishes.html">Browse Wishes</a>
                     <button id="logoutButton">Logout</button>
                 `;
+                // Show the wish submission form
+                document.getElementById('wishForm').style.display = "block";
 
                 // Add logout functionality
                 document.getElementById('logoutButton').addEventListener('click', () => {
@@ -133,10 +154,32 @@
                     <a href="#">Success Stories</a>
                     <a href="auth.html">Sign Up/Login</a>
                 `;
+                // Hide the wish submission form
+                document.getElementById('wishForm').style.display = "none";
             }
         });
 
-        // Call fetch function
+        // Handle form submission for new wishes
+        document.getElementById('wishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('wishTitle').value;
+            const description = document.getElementById('wishDescription').value;
+            const cost = document.getElementById('wishCost').value;
+
+            await setDoc(doc(db, "wishes", doc(db.collection("wishes").doc().id)), {
+                title: title,
+                description: description,
+                cost: cost,
+                userId: auth.currentUser.uid
+            });
+            alert("Wish submitted successfully!");
+
+            // Clear the form
+            document.getElementById('wishForm').reset();
+            fetchFeaturedWishes(); // Refresh the featured wishes
+        });
+
+        // Call fetch function for featured wishes
         fetchFeaturedWishes();
     </script>
 </body>
