@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wish Submission - WishConnect</title>
+    <title>Submit a Wish - WishConnect</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -19,95 +19,110 @@
             text-align: center;
         }
         .submission-form {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
+            background-color: white;
+            padding: 20px;
             border-radius: 8px;
+            margin: 20px auto;
+            max-width: 400px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        footer {
+        nav {
             background-color: #343a40;
             color: white;
+            padding: 10px;
             text-align: center;
-            padding: 15px 0;
-            margin-top: 20px;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>WishConnect</h1>
+        <h1>Submit a Wish</h1>
     </header>
-    <section class="submission-form">
-        <h2>Wish for Something</h2>
-        <p id="authMessage">You need to be registered and logged in to submit a wish.</p>
-        <form id="wishForm" style="display: none;">
+
+    <nav>
+        <span id="navLinks"></span>
+    </nav>
+
+    <div class="submission-form">
+        <form id="wishForm">
             <input type="text" id="wishTitle" placeholder="Wish Title" required />
             <textarea id="wishDescription" placeholder="Describe your wish..." required></textarea>
             <input type="text" id="wishCost" placeholder="Approximate Cost" required />
             <button type="submit">Submit Wish</button>
         </form>
-    </section>
-    <footer>
-        <p>&copy; 2024 WishConnect. All rights reserved.</p>
-    </footer>
+    </div>
 
     <script type="module">
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+            authDomain: "wishconnect-95318.firebaseapp.com",
+            projectId: "wishconnect-95318",
+            storageBucket: "wishconnect-95318",
+            messagingSenderId: "417927480202",
+            appId: "1:417927480202:web:28a57312f25e09919a7e73"
+        };
+
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth();
-        const db = getFirestore();
+        const db = getFirestore(app);
 
-        onAuthStateChanged(auth, async (user) => {
+        // Check authentication state and update navigation
+        onAuthStateChanged(auth, (user) => {
+            const navLinks = document.getElementById('navLinks');
             if (user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists() && userDoc.data().paypalUsername) {
-                    // User has a PayPal username, allow wish submission
-                    document.getElementById('wishForm').style.display = 'block';
-                } else {
-                    // User doesn't have a PayPal username, redirect to the setup page
-                    window.location.href = 'setup-paypal.html';
-                }
+                navLinks.innerHTML = `
+                    <a href="index.html">Home</a>
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Success Stories</a>
+                    <a href="browse-wishes.html">Browse Wishes</a>
+                    <button id="logoutButton">Logout</button>
+                `;
+
+                // Add logout functionality
+                document.getElementById('logoutButton').addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.location.href = "index.html"; // Redirect to homepage after logout
+                    });
+                });
             } else {
-                // User is not logged in, display the auth message
-                document.getElementById('authMessage').textContent = 'You must be logged in to submit a wish.';
+                navLinks.innerHTML = `
+                    <a href="#">How It Works</a>
+                    <a href="#">Success Stories</a>
+                    <a href="auth.html">Sign Up/Login</a>
+                `;
+                alert("You need to be logged in to submit a wish!");
+                window.location.href = "auth.html"; // Redirect to login page if not logged in
             }
         });
 
+        // Handle form submission for new wishes
         document.getElementById('wishForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const wishTitle = document.getElementById('wishTitle').value;
-            const wishDescription = document.getElementById('wishDescription').value;
-            const wishCost = document.getElementById('wishCost').value;
+            const title = document.getElementById('wishTitle').value;
+            const description = document.getElementById('wishDescription').value;
+            const cost = document.getElementById('wishCost').value;
 
-            try {
-                await addDoc(collection(db, "wishes"), {
-                    title: wishTitle,
-                    description: wishDescription,
-                    cost: wishCost,
-                    userId: auth.currentUser.uid
-                });
-                alert("Wish submitted successfully!");
-            } catch (error) {
-                alert("Error submitting wish: " + error.message);
-            }
+            await setDoc(doc(db, "wishes", doc(db.collection("wishes").doc().id)), {
+                title: title,
+                description: description,
+                cost: cost,
+                userId: auth.currentUser.uid
+            });
+            alert("Wish submitted successfully!");
+            // Clear the form
+            document.getElementById('wishForm').reset();
         });
     </script>
 </body>
