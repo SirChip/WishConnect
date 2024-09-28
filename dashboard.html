@@ -126,6 +126,8 @@
                 const querySnapshot = await getDocs(q);
                 const wishList = document.getElementById("wishList");
 
+                wishList.innerHTML = ""; // Clear the list before displaying
+
                 querySnapshot.forEach((doc) => {
                     const wishData = doc.data();
                     const wishItem = document.createElement("div");
