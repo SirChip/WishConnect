@@ -33,6 +33,19 @@
             text-align: center;
             margin: 20px;
         }
+        .wishes-section {
+            margin: 20px;
+            text-align: left;
+            max-width: 800px;
+            margin: auto;
+        }
+        .wish {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -50,6 +63,11 @@
         <p>Browse our community, share your wishes, and see how we can help you achieve them.</p>
     </div>
 
+    <div class="wishes-section">
+        <h2>Featured Wishes</h2>
+        <div id="featuredWishes"></div>
+    </div>
+
     <script type="module">
         // Firebase configuration
         const firebaseConfig = {
@@ -64,9 +82,30 @@
         // Initialize Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
+        const db = getFirestore(app);
+
+        // Fetch and display featured wishes
+        async function fetchFeaturedWishes() {
+            const wishesCollection = collection(db, "wishes");
+            const wishSnapshot = await getDocs(wishesCollection);
+            const wishList = document.getElementById("featuredWishes");
+
+            wishSnapshot.forEach((doc) => {
+                const wishData = doc.data();
+                const wishItem = document.createElement("div");
+                wishItem.className = "wish";
+                wishItem.innerHTML = `
+                    <h3>${wishData.title}</h3>
+                    <p>${wishData.description}</p>
+                    <p>Cost: $${wishData.cost}</p>
+                `;
+                wishList.appendChild(wishItem);
+            });
+        }
 
         // Check authentication state and update navigation
         onAuthStateChanged(auth, (user) => {
@@ -96,6 +135,9 @@
                 `;
             }
         });
+
+        // Call fetch function
+        fetchFeaturedWishes();
     </script>
 </body>
 </html>
