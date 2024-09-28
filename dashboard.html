@@ -86,115 +86,112 @@
     </footer>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, deleteDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, deleteDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-            authDomain: "wishconnect-95318.firebaseapp.com",
-            projectId: "wishconnect-95318",
-            storageBucket: "wishconnect-95318",
-            messagingSenderId: "417927480202",
-            appId: "1:417927480202:web:28a57312f25e09919a7e73"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+        authDomain: "wishconnect-95318.firebaseapp.com",
+        projectId: "wishconnect-95318",
+        storageBucket: "wishconnect-95318.appspot.com",
+        messagingSenderId: "417927480202",
+        appId: "1:417927480202:web:28a57312f25e09919a7e73"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
 
-        onAuthStateChanged(auth, async (user) => {
-            const navLinks = document.getElementById('navLinks');
-            if (user) {
-                navLinks.innerHTML = `
-                    <a href="index.html">Home</a>
-                    <a href="#">How It Works</a>
-                    <a href="#">Success Stories</a>
-                    <a href="browse-wishes.html">Browse Wishes</a>
-                    <button id="logoutButton">Logout</button>
-                `;
+    onAuthStateChanged(auth, async (user) => {
+        const navLinks = document.getElementById('navLinks');
+        if (user) {
+            navLinks.innerHTML = `
+                <a href="index.html">Home</a>
+                <a href="#">How It Works</a>
+                <a href="#">Success Stories</a>
+                <a href="browse-wishes.html">Browse Wishes</a>
+                <button id="logoutButton">Logout</button>
+            `;
 
-                // Add logout functionality
-                document.getElementById('logoutButton').addEventListener('click', () => {
-                    auth.signOut().then(() => {
-                        window.location.href = "index.html"; // Redirect to homepage after logout
-                    });
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    window.location.href = "index.html";
                 });
+            });
 
-                // Fetch and display user wishes
-                const q = query(collection(db, "wishes"), where("userId", "==", user.uid));
-                const querySnapshot = await getDocs(q);
-                const wishList = document.getElementById("wishList");
+            await displayUserWishes(user.uid);
+        } else {
+            window.location.href = "auth.html";
+        }
+    });
 
-                wishList.innerHTML = ""; // Clear the list before displaying
+    async function displayUserWishes(userId) {
+        const q = query(collection(db, "wishes"), where("userId", "==", userId));
+        const querySnapshot = await getDocs(q);
+        const wishList = document.getElementById("wishList");
 
-                querySnapshot.forEach((doc) => {
-                    const wishData = doc.data();
-                    const wishItem = document.createElement("div");
-                    wishItem.className = "wish";
-                    wishItem.innerHTML = `
-                        <h3>${wishData.title}</h3>
-                        <p>${wishData.description}</p>
-                        <p>Cost: $${wishData.cost}</p>
-                        <button onclick="editWish('${doc.id}', '${wishData.title}', '${wishData.description}', '${wishData.cost}')">Edit</button>
-                        <button onclick="deleteWish('${doc.id}')">Delete</button>
-                    `;
-                    wishList.appendChild(wishItem);
-                });
-            } else {
-                // If not logged in, redirect to auth.html
-                window.location.href = "auth.html";
-            }
+        wishList.innerHTML = "";
+
+        querySnapshot.forEach((doc) => {
+            const wishData = doc.data();
+            const wishItem = document.createElement("div");
+            wishItem.className = "wish";
+            wishItem.innerHTML = `
+                <h3>${wishData.title}</h3>
+                <p>${wishData.description}</p>
+                <p>Cost: $${wishData.cost}</p>
+                <button onclick="editWish('${doc.id}', '${wishData.title}', '${wishData.description}', '${wishData.cost}')">Edit</button>
+                <button onclick="deleteWish('${doc.id}')">Delete</button>
+            `;
+            wishList.appendChild(wishItem);
         });
+    }
 
-        // Function to delete a wish
-        async function deleteWish(wishId) {
+    window.editWish = function(wishId, title, description, cost) {
+        document.getElementById('wishId').value = wishId;
+        document.getElementById('wishTitle').value = title;
+        document.getElementById('wishDescription').value = description;
+        document.getElementById('wishCost').value = cost;
+    }
+
+    window.deleteWish = async function(wishId) {
+        if (confirm("Are you sure you want to delete this wish?")) {
             await deleteDoc(doc(db, "wishes", wishId));
             alert("Wish deleted successfully!");
-            location.reload(); // Refresh the page to update the wish list
+            location.reload();
+        }
+    }
+
+    document.getElementById('wishForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('wishTitle').value;
+        const description = document.getElementById('wishDescription').value;
+        const cost = document.getElementById('wishCost').value;
+        const wishId = document.getElementById('wishId').value;
+
+        if (wishId) {
+            await setDoc(doc(db, "wishes", wishId), {
+                title: title,
+                description: description,
+                cost: cost,
+                userId: auth.currentUser.uid
+            });
+            alert("Wish updated successfully!");
+        } else {
+            await setDoc(doc(collection(db, "wishes")), {
+                title: title,
+                description: description,
+                cost: cost,
+                userId: auth.currentUser.uid
+            });
+            alert("Wish submitted successfully!");
         }
 
-        // Function to edit a wish
-        function editWish(wishId, title, description, cost) {
-            document.getElementById('wishId').value = wishId; // Set the wish ID
-            document.getElementById('wishTitle').value = title; // Populate the title
-            document.getElementById('wishDescription').value = description; // Populate the description
-            document.getElementById('wishCost').value = cost; // Populate the cost
-        }
-
-        // Handle form submission for new wishes and editing existing wishes
-        document.getElementById('wishForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('wishTitle').value;
-            const description = document.getElementById('wishDescription').value;
-            const cost = document.getElementById('wishCost').value;
-            const wishId = document.getElementById('wishId').value;
-
-            if (wishId) {
-                // If wishId exists, we're editing an existing wish
-                await setDoc(doc(db, "wishes", wishId), {
-                    title: title,
-                    description: description,
-                    cost: cost,
-                    userId: auth.currentUser.uid
-                });
-                alert("Wish updated successfully!");
-            } else {
-                // Otherwise, we're creating a new wish
-                await setDoc(doc(db, "wishes", doc(db.collection("wishes")).id), {
-                    title: title,
-                    description: description,
-                    cost: cost,
-                    userId: auth.currentUser.uid
-                });
-                alert("Wish submitted successfully!");
-            }
-
-            // Clear the form
-            document.getElementById('wishForm').reset();
-            document.getElementById('wishId').value = ""; // Reset wish ID
-            location.reload(); // Refresh the page to update the wish list
-        });
-    </script>
+        document.getElementById('wishForm').reset();
+        document.getElementById('wishId').value = "";
+        location.reload();
+    });
+</script>
 </body>
 </html>
