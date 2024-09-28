@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WishConnect</title>
+    <title>WishConnect - Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -19,131 +19,57 @@
             text-align: center;
         }
         nav {
-            margin: 20px 0;
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            text-align: center;
         }
         nav a {
             color: white;
             margin: 0 15px;
             text-decoration: none;
         }
-        .hero {
-            background-color: #fff;
-            padding: 50px;
-            text-align: center;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: 20px;
-        }
-        .cta {
-            margin: 20px 0;
-        }
-        .cta button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .how-it-works {
-            text-align: center;
-            margin: 50px 0;
-        }
-        .featured-wishes {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-        .card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: 10px;
-            padding: 20px;
-            width: 250px;
-            text-align: center;
-        }
-        footer {
-            background-color: #343a40;
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
-<header>
-    <h1>WishConnect</h1>
+    <header>
+        <h1>Welcome to WishConnect</h1>
+    </header>
+
     <nav>
-        <a href="#">Home</a>
-        <a href="#">How It Works</a>
-        <a href="#">Success Stories</a>
-        <a href="#">Community</a>
-        <a href="auth.html">Sign Up/Login</a>
+        <span id="navLinks"></span>
     </nav>
-</header>
-<section class="hero">
-    <h2>Make a Wish Come True</h2>
-    <p>Join us in connecting those in need with those who can help.</p>
-    <div class="cta">
-        <button onclick="window.location.href='browse-wishes.html'">Browse Wishes</button>
-        <button onclick="window.location.href='wish-submission.html'">Submit a Wish</button>
-    </div>
-</section>
-<section class="how-it-works">
-    <h2>How It Works</h2>
-    <p>1. Wishers list what they want.</p>
-    <p>2. Givers browse and fulfill wishes.</p>
-    <p>3. Everyone makes a difference!</p>
-</section>
-<section class="featured-wishes">
-    <h2>Featured Wishes</h2>
-    <div id="wishesContainer" class="featured-wishes"></div>
-</section>
-<footer>
-    <p>&copy; 2024 WishConnect. All rights reserved.</p>
-</footer>
 
-<script type="module">
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-        authDomain: "wishconnect-95318.firebaseapp.com",
-        projectId: "wishconnect-95318",
-        storageBucket: "wishconnect-95318.appspot.com",
-        messagingSenderId: "417927480202",
-        appId: "1:417927480202:web:28a57312f25e09919a7e73",
-        measurementId: "G-MJRGY2YR73"
-    };
+    <script type="module">
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
-    // Initialize Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        const auth = getAuth();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        onAuthStateChanged(auth, (user) => {
+            const navLinks = document.getElementById('navLinks');
+            if (user) {
+                navLinks.innerHTML = `
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#">How It Works</a>
+                    <a href="#">Success Stories</a>
+                    <a href="browse-wishes.html">Browse Wishes</a>
+                    <button id="logoutButton">Logout</button>
+                `;
 
-    async function fetchWishes() {
-        const wishesSnapshot = await getDocs(collection(db, 'wishes'));
-        const wishesContainer = document.getElementById('wishesContainer');
-        wishesSnapshot.forEach((doc) => {
-            const wishData = doc.data();
-            const wishCard = document.createElement('div');
-            wishCard.className = 'card';
-            wishCard.innerHTML = `
-                <h3>${wishData.title}</h3>
-                <p>${wishData.cost}</p>
-                <button onclick="window.location.href='fulfill-wish.html?id=${doc.id}'">View & Fulfill</button>
-            `;
-            wishesContainer.appendChild(wishCard);
+                // Add logout functionality
+                document.getElementById('logoutButton').addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.location.href = "auth.html"; // Redirect to login page
+                    });
+                });
+            } else {
+                navLinks.innerHTML = `
+                    <a href="#">How It Works</a>
+                    <a href="#">Success Stories</a>
+                    <a href="auth.html">Sign Up/Login</a>
+                `;
+            }
         });
-    }
-
-    fetchWishes();
-</script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
-<script src="auth.js" type="module"></script>
+    </script>
 </body>
 </html>
