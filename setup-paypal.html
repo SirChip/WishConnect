@@ -68,12 +68,12 @@
     document.getElementById('save-paypal').onclick = async () => {
         const user = auth.currentUser;
         const paypalUsername = document.getElementById('paypal-username').value;
-        if (user) {
+        if (user && paypalUsername) {
             await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername }, { merge: true });
             alert("PayPal username saved!");
             window.location.href = 'dashboard.html'; // Redirect to the dashboard
         } else {
-            alert("User not authenticated.");
+            alert("User not authenticated or PayPal username missing.");
         }
     };
 </script>
