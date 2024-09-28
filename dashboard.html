@@ -35,16 +35,51 @@
             text-align: center;
             padding: 15px 0;
         }
+        .submission-form {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>User Dashboard</h1>
     </header>
+    
     <section id="userWishes">
         <h2>Your Wishes</h2>
         <div id="wishList"></div>
     </section>
+
+    <section class="submission-form">
+        <h2>Submit a Wish</h2>
+        <form id="wishForm">
+            <input type="text" id="wishTitle" placeholder="Wish Title" required />
+            <textarea id="wishDescription" placeholder="Describe your wish..." required></textarea>
+            <input type="text" id="wishCost" placeholder="Approximate Cost" required />
+            <button type="submit">Submit Wish</button>
+        </form>
+    </section>
+
     <footer>
         <p>&copy; 2024 WishConnect. All rights reserved.</p>
     </footer>
@@ -52,15 +87,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const firebaseConfig = {
-          apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
-          authDomain: "wishconnect-95318.firebaseapp.com",
-          projectId: "wishconnect-95318",
-          storageBucket: "wishconnect-95318.appspot.com",
-          messagingSenderId: "417927480202",
-          appId: "1:417927480202:web:28a57312f25e09919a7e73"
+            apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
+            authDomain: "wishconnect-95318.firebaseapp.com",
+            projectId: "wishconnect-95318",
+            storageBucket: "wishconnect-95318.appspot.com",
+            messagingSenderId: "417927480202",
+            appId: "1:417927480202:web:28a57312f25e09919a7e73"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -69,6 +104,7 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Fetch and display user wishes
                 const q = query(collection(db, "wishes"), where("userId", "==", user.uid));
                 const querySnapshot = await getDocs(q);
                 const wishList = document.getElementById("wishList");
@@ -84,7 +120,31 @@
                     `;
                     wishList.appendChild(wishItem);
                 });
+
+                // Handle wish submission
+                document.getElementById('wishForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const wishTitle = document.getElementById('wishTitle').value;
+                    const wishDescription = document.getElementById('wishDescription').value;
+                    const wishCost = document.getElementById('wishCost').value;
+
+                    try {
+                        await addDoc(collection(db, "wishes"), {
+                            title: wishTitle,
+                            description: wishDescription,
+                            cost: wishCost,
+                            userId: user.uid
+                        });
+                        alert("Wish submitted successfully!");
+
+                        // Optionally refresh the wish list
+                        location.reload();
+                    } catch (error) {
+                        alert("Error submitting wish: " + error.message);
+                    }
+                });
             } else {
+                // If not logged in, redirect to auth.html
                 window.location.href = "auth.html";
             }
         });
