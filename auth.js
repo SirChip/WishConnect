@@ -1,13 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDFkV0nZx5HCzEPBPdLcqu0aclTLxaaVxs",
     authDomain: "wishconnect-95318.firebaseapp.com",
     projectId: "wishconnect-95318",
-    storageBucket: "wishconnect-95318.appspot.com",
+    storageBucket: "wishconnect-95318",
     messagingSenderId: "417927480202",
     appId: "1:417927480202:web:28a57312f25e09919a7e73"
 };
@@ -25,29 +25,24 @@ authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const paypalUsername = document.getElementById('paypalUsername').value; // Get PayPal username
 
     // Try to sign in
     signInWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
             const user = userCredential.user;
 
-            // Check if PayPal username exists
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists() && !userDoc.data().paypalUsername) {
-                // Redirect to PayPal setup if username is missing
-                window.location.href = 'setup-paypal.html';
-            } else {
-                window.location.href = 'dashboard.html';
-            }
+            // Redirect to dashboard if logged in
+            window.location.href = 'dashboard.html';
         })
         .catch((error) => {
             // If not signed in, try to create a new user
             createUserWithEmailAndPassword(auth, email, password)
                 .then(async (userCredential) => {
                     const user = userCredential.user;
-                    // Initialize the user document with PayPal username
-                    await setDoc(doc(db, "users", user.uid), { paypalUsername: null }); // Initialize PayPal username
-                    window.location.href = 'setup-paypal.html'; // Redirect to PayPal setup
+                    // Save user details including PayPal username
+                    await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername });
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
                 })
                 .catch((error) => {
                     // Display any error
