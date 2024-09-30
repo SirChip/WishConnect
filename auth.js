@@ -61,9 +61,14 @@ signupForm.addEventListener('submit', async (e) => {
         await sendEmailVerification(user);
         alert("Verification email sent! Please check your inbox.");
 
-        // Save user details including PayPal username
-        await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername });
+        // Debug log to verify user creation
+        console.log("Storing user details:", { paypalUsername });
 
+        // Save user details including PayPal username
+        await setDoc(doc(db, "users", user.uid), { 
+            paypalUsername: paypalUsername 
+        });
+        
         // Inform the user they need to verify their email
         alert("You need to verify your email before logging in.");
         
@@ -71,6 +76,7 @@ signupForm.addEventListener('submit', async (e) => {
         await auth.signOut();
     } catch (error) {
         authMessage.textContent = error.message;
+        console.error("Error during sign-up:", error); // Log error details
     }
 });
 
