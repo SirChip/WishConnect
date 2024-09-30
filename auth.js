@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Firebase configuration
@@ -57,9 +57,6 @@ signupForm.addEventListener('submit', async (e) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Debug log to verify user creation
-        console.log("User created:", user); // Check if the user object is valid
-
         // Send verification email
         await sendEmailVerification(user);
         alert("Verification email sent! Please check your inbox.");
@@ -71,7 +68,6 @@ signupForm.addEventListener('submit', async (e) => {
         window.location.href = 'dashboard.html';
     } catch (error) {
         authMessage.textContent = error.message;
-        console.error("Error during sign-up:", error); // Log error details
     }
 });
 
