@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Firebase configuration
@@ -57,6 +57,9 @@ signupForm.addEventListener('submit', async (e) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        // Debug log to verify user creation
+        console.log("User created:", user); // Check if the user object is valid
+
         // Send verification email
         await sendEmailVerification(user);
         alert("Verification email sent! Please check your inbox.");
@@ -68,6 +71,7 @@ signupForm.addEventListener('submit', async (e) => {
         window.location.href = 'dashboard.html';
     } catch (error) {
         authMessage.textContent = error.message;
+        console.error("Error during sign-up:", error); // Log error details
     }
 });
 
@@ -105,17 +109,5 @@ document.getElementById('toggleForm').addEventListener('click', () => {
         loginForm.classList.add('active');
         formTitle.textContent = "Login";
         document.getElementById('toggleForm').textContent = "Switch to Sign Up";
-    }
-});
-
-// Monitor authentication state
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // Check if the user's email is verified
-        if (!user.emailVerified) {
-            alert("Please verify your email address.");
-            await auth.signOut(); // Sign the user out if the email is not verified
-            window.location.href = "auth.html"; // Redirect to login
-        }
     }
 });
