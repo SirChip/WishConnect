@@ -77,8 +77,20 @@ document.getElementById('forgotPassword').addEventListener('click', async () => 
 
 // Switch between Login and Sign-Up forms
 document.getElementById('toggleForm').addEventListener('click', () => {
-    loginForm.classList.toggle('active');
-    signupForm.classList.toggle('active');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
     const formTitle = document.getElementById('formTitle');
-    formTitle.textContent = loginForm.classList.contains('active') ? "Login" : "Sign Up";
+
+    // Toggle active class between the forms
+    if (loginForm.classList.contains('active')) {
+        loginForm.classList.remove('active');
+        signupForm.classList.add('active');
+        formTitle.textContent = "Sign Up";
+        document.getElementById('toggleForm').textContent = "Switch to Login";
+    } else {
+        signupForm.classList.remove('active');
+        loginForm.classList.add('active');
+        formTitle.textContent = "Login";
+        document.getElementById('toggleForm').textContent = "Switch to Sign Up";
+    }
 });
