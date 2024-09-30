@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Firebase configuration
@@ -28,22 +28,14 @@ loginForm.addEventListener('submit', async (e) => {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Check if the user's email is verified
-        if (user.emailVerified) {
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
             // Redirect to dashboard
             window.location.href = 'dashboard.html';
-        } else {
-            alert("Please verify your email address before logging in.");
-            await auth.signOut(); // Sign the user out if the email is not verified
-            window.location.href = "auth.html"; // Redirect to login
-        }
-    } catch (error) {
-        authMessage.textContent = error.message;
-    }
+        })
+        .catch((error) => {
+            authMessage.textContent = error.message;
+        });
 });
 
 // Handle Sign-Up
@@ -53,31 +45,17 @@ signupForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('signupPassword').value;
     const paypalUsername = document.getElementById('paypalUsername').value; // Get PayPal username
 
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Send verification email
-        await sendEmailVerification(user);
-        alert("Verification email sent! Please check your inbox.");
-
-        // Debug log to verify user creation
-        console.log("Storing user details:", { paypalUsername });
-
-        // Save user details including PayPal username
-        await setDoc(doc(db, "users", user.uid), { 
-            paypalUsername: paypalUsername 
+    createUserWithEmailAndPassword(auth, email, password)
+        .then(async (userCredential) => {
+            const user = userCredential.user;
+            // Save user details including PayPal username
+            await setDoc(doc(db, "users", user.uid), { paypalUsername: paypalUsername });
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        })
+        .catch((error) => {
+            authMessage.textContent = error.message;
         });
-        
-        // Inform the user they need to verify their email
-        alert("You need to verify your email before logging in.");
-        
-        // Sign the user out immediately after sending the verification email
-        await auth.signOut();
-    } catch (error) {
-        authMessage.textContent = error.message;
-        console.error("Error during sign-up:", error); // Log error details
-    }
 });
 
 // Handle Forgot Password
@@ -114,17 +92,5 @@ document.getElementById('toggleForm').addEventListener('click', () => {
         loginForm.classList.add('active');
         formTitle.textContent = "Login";
         document.getElementById('toggleForm').textContent = "Switch to Sign Up";
-    }
-});
-
-// Monitor authentication state
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // Check if the user's email is verified
-        if (!user.emailVerified) {
-            alert("Please verify your email address.");
-            await auth.signOut(); // Sign the user out if the email is not verified
-            window.location.href = "auth.html"; // Redirect to login
-        }
     }
 });
