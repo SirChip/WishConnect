@@ -20,6 +20,7 @@ const db = getFirestore(app);
 // Form submissions
 const loginForm = document.getElementById('loginForm');
 const signupForm = document.getElementById('signupForm');
+const forgotPasswordForm = document.getElementById('forgotPasswordForm');
 const authMessage = document.getElementById('authMessage');
 
 // Handle Login
@@ -43,7 +44,7 @@ signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
-    const paypalUsername = document.getElementById('paypalUsername').value; // Get PayPal username
+    const paypalUsername = document.getElementById('paypalUsername').value;
 
     createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
@@ -58,10 +59,34 @@ signupForm.addEventListener('submit', async (e) => {
         });
 });
 
+// Handle Forgot Password
+forgotPasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('resetEmail').value;
+
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            authMessage.textContent = "Password reset email sent. Please check your inbox.";
+        })
+        .catch((error) => {
+            authMessage.textContent = error.message;
+        });
+});
+
 // Switch between Login and Sign-Up forms
 document.getElementById('toggleForm').addEventListener('click', () => {
     loginForm.classList.toggle('active');
     signupForm.classList.toggle('active');
+    forgotPasswordForm.classList.remove('active');
     const formTitle = document.getElementById('formTitle');
     formTitle.textContent = loginForm.classList.contains('active') ? "Login" : "Sign Up";
+});
+
+// Show Forgot Password form
+document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.remove('active');
+    signupForm.classList.remove('active');
+    forgotPasswordForm.classList.add('active');
+    document.getElementById('formTitle').textContent = "Reset Password";
 });
