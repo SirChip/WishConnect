@@ -3,74 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WishConnect - Make Wishes Come True</title>
+    <title>WishConnect - Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f4f8;
-            color: #333;
+            background-color: #f8f9fa;
         }
         header {
             background-color: #4CAF50;
             color: white;
-            padding: 20px 0;
+            padding: 20px;
             text-align: center;
         }
         nav {
-            background-color: #45a049;
-            padding: 10px 0;
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
             text-align: center;
         }
         nav a {
             color: white;
             margin: 0 15px;
             text-decoration: none;
-            font-weight: bold;
-        }
-        .hero {
-            background-image: url('person.webp');
-            background-size: cover;
-            background-position: center;
-            height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-        }
-        .hero-content {
-            background-color: rgba(0,0,0,0.5);
-            padding: 20px;
-            border-radius: 10px;
         }
         .content {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
+            text-align: center;
+            margin: 20px;
         }
-        .featured-wishes {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 40px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .wishes-section {
+            margin: 20px;
+            text-align: left;
+            max-width: 800px;
+            margin: auto;
         }
         .wish {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .wish:last-child {
-            border-bottom: none;
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
         }
-        footer {
-            background-color: #333;
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #wishForm input, #wishForm textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #wishForm button {
+            background-color: #4CAF50;
             color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 40px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #wishForm button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -83,28 +107,30 @@
         <span id="navLinks"></span>
     </nav>
 
-    <div class="hero">
-        <div class="hero-content">
-            <h2>Make Wishes Come True</h2>
-            <p>Join our community to share and fulfill wishes!</p>
-        </div>
-    </div>
-
     <div class="content">
-        <h2>About WishConnect</h2>
-        <p>WishConnect is a platform where people can share their wishes and help others fulfill theirs. Whether it's a small gesture or a life-changing dream, we believe in the power of community to make wishes come true.</p>
-        
-        <div class="featured-wishes">
-            <h2>Featured Wishes</h2>
-            <div id="featuredWishes">
-                <!-- Wishes will be dynamically inserted here -->
-            </div>
-        </div>
+        <h2>Your Wishes Matter!</h2>
+        <p>At WishConnect, we help you fulfill your dreams and wishes. Join us today!</p>
+        <p>Browse our community, share your wishes, and see how we can help you achieve them.</p>
     </div>
 
-    <footer>
-        <p>&copy; 2024 WishConnect. All rights reserved.</p>
-    </footer>
+    <div class="wishes-section">
+        <h2>Featured Wishes</h2>
+        <div id="featuredWishes"></div>
+    </div>
+
+    <!-- Modal for wish submission -->
+    <div id="wishModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Submit a Wish</h2>
+            <form id="wishForm">
+                <input type="text" id="wishTitle" placeholder="Wish Title" required />
+                <textarea id="wishDescription" placeholder="Describe your wish..." required></textarea>
+                <input type="text" id="wishCost" placeholder="Approximate Cost" required />
+                <button type="submit">Submit Wish</button>
+            </form>
+        </div>
+    </div>
 
     <script type="module">
         // Firebase configuration
@@ -120,13 +146,13 @@
         // Initialize Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore(app);
 
-        // Fetch and display featured wishes
+        // Fetch and display featured wishes for everyone
         async function fetchFeaturedWishes() {
             const wishesCollection = collection(db, "wishes");
             const wishSnapshot = await getDocs(wishesCollection);
@@ -151,27 +177,71 @@
         onAuthStateChanged(auth, (user) => {
             const navLinks = document.getElementById('navLinks');
             if (user) {
+                // User is logged in
                 navLinks.innerHTML = `
                     <a href="dashboard.html">Dashboard</a>
                     <a href="#">How It Works</a>
                     <a href="#">Success Stories</a>
                     <a href="browse-wishes.html">Browse Wishes</a>
-                    <a href="submit-wish.html">Submit a Wish</a>
+                    <a href="#" id="submitWishLink">Submit a Wish</a>
                     <button id="logoutButton">Logout</button>
                 `;
                 
+                // Add logout functionality
                 document.getElementById('logoutButton').addEventListener('click', () => {
                     auth.signOut().then(() => {
-                        window.location.href = "index.html";
+                        window.location.href = "index.html"; // Redirect to homepage after logout
                     });
                 });
+
+                // Add submit wish functionality
+                document.getElementById('submitWishLink').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('wishModal').style.display = "block";
+                });
             } else {
+                // User is not logged in
                 navLinks.innerHTML = `
                     <a href="#">How It Works</a>
                     <a href="#">Success Stories</a>
-                    <a href="browse-wishes.html">Browse Wishes</a>
                     <a href="auth.html">Sign Up/Login</a>
                 `;
+            }
+        });
+
+        // Handle form submission for new wishes
+        document.getElementById('wishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('wishTitle').value;
+            const description = document.getElementById('wishDescription').value;
+            const cost = document.getElementById('wishCost').value;
+
+            try {
+                await addDoc(collection(db, "wishes"), {
+                    title: title,
+                    description: description,
+                    cost: cost,
+                    userId: auth.currentUser.uid
+                });
+                alert("Wish submitted successfully!");
+                document.getElementById('wishForm').reset();
+                document.getElementById('wishModal').style.display = "none";
+                fetchFeaturedWishes(); // Refresh the featured wishes
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("An error occurred while submitting your wish. Please try again.");
+            }
+        });
+
+        // Close modal when clicking on <span> (x)
+        document.querySelector('.close').addEventListener('click', () => {
+            document.getElementById('wishModal').style.display = "none";
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target == document.getElementById('wishModal')) {
+                document.getElementById('wishModal').style.display = "none";
             }
         });
 
